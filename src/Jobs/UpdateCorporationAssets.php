@@ -52,6 +52,11 @@ class UpdateCorporationAssets implements ShouldQueue
         );
     }
 
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(15);
+    }
+
     private static array $ITEM_BLACKLIST = [
         27 //Corporation Hangar Office
     ];

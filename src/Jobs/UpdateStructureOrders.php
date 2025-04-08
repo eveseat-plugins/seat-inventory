@@ -2,6 +2,7 @@
 
 namespace RecursiveTree\Seat\Inventory\Jobs;
 
+use DateTime;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 use RecursiveTree\Seat\Inventory\Models\InventoryItem;
@@ -78,6 +79,11 @@ class UpdateStructureOrders extends AbstractAuthCharacterJob
                 (new WithoutOverlapping($this->workspace->id))->releaseAfter(60),
             ]
         );
+    }
+
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(15);
     }
 
     /**

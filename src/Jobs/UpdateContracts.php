@@ -2,6 +2,7 @@
 
 namespace RecursiveTree\Seat\Inventory\Jobs;
 
+use DateTime;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,6 +28,11 @@ use Seat\Eveapi\Models\Universe\UniverseStructure;
 class UpdateContracts implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(15);
+    }
 
     private static array $ITEM_BLACKLIST = [
         27 //Corporation Hangar Office

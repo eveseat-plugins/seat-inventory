@@ -2,6 +2,7 @@
 
 namespace RecursiveTree\Seat\Inventory\Jobs;
 
+use DateTime;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -44,6 +45,11 @@ class UpdateStockLevels implements ShouldQueue
                 (new WithoutOverlapping($this->workspace_id))->releaseAfter(60),
             ]
         );
+    }
+
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(15);
     }
 
     public function handle()
