@@ -37,6 +37,6 @@
   },
   "suggest": {
     "recursivetree/seat-alliance-industry": "Export missing items and directly create alliance-industry orders.",
-    "denngarr/seat-fitting": "Create stocks based on fittings from the seat-fitting plugin"
+    "cryptatech/seat-fitting": "Create stocks based on fittings from the seat-fitting plugin."
   }
 }
