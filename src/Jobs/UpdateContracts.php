@@ -55,27 +55,24 @@ class UpdateContracts implements ShouldQueue
 
     public function middleware(): array
     {
-        return array_merge(
-            [
-                (new WithoutOverlapping($this->workspace->id))->releaseAfter(60),
-            ]
-        );
+        return [(new WithoutOverlapping($this->workspace->id))->releaseAfter(60)];
     }
 
 
     public function handle()
     {
+        logger()->error("seat-inventory:contracts:handle called");
         $corporations = TrackedCorporation::where("workspace_id",$this->workspace->id)->pluck("corporation_id");
         $alliances = TrackedAlliance::where("workspace_id",$this->workspace->id)->pluck("alliance_id");
 
-        DB::transaction(function () use ($alliances, $corporations) {
-            $this->handleContracts($corporations, $alliances, $this->workspace->id);
-        });
+        $this->handleContracts($corporations, $alliances, $this->workspace->id);
+        logger()->error("seat-inventory:contracts:updated");
 
         $ids = Stock::pluck("location_id")->unique();
         foreach ($ids as $id) {
             UpdateStockLevels::dispatch($id, $this->workspace->id)->onQueue('default');
         }
+        logger()->error("seat-inventory:contracts:done");
     }
 
     private function handleContracts($corporation_ids, $alliance_ids, $workspace_id)
