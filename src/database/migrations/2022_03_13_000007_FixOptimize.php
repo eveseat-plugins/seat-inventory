@@ -21,8 +21,6 @@ class FixOptimize extends Migration
                 $table->bigIncrements("id");
             });
         }
-
-        UpdateInventory::dispatch()->onQueue('default');
     }
 
     public function down()

@@ -12,8 +12,6 @@ class AddInMoveStocks extends Migration
     {
 
         DB::statement("ALTER TABLE `recursive_tree_seat_inventory_inventory_source` CHANGE `source_type` `source_type` ENUM('corporation_hangar', 'contract', 'in_transport');");
-
-        UpdateInventory::dispatch()->onQueue('default');
     }
 
     public function down()

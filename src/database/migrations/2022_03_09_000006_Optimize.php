@@ -27,8 +27,6 @@ class Optimize extends Migration
             $table->dropColumn("id");
             $table->bigInteger("managed_by")->nullable()->default(null);
         });
-
-        UpdateInventory::dispatch()->onQueue('default');
     }
 
     public function down()

@@ -16,8 +16,6 @@ class AddUpdateTimestamps extends Migration
         Schema::table('recursive_tree_seat_inventory_inventory_source',function (Blueprint $table){
             $table->timestamp("last_updated")->nullable();
         });
-
-        UpdateInventory::dispatch()->onQueue('default');
     }
 
     public function down()

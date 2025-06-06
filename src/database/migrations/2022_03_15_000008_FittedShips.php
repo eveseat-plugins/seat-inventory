@@ -13,8 +13,6 @@ class FittedShips extends Migration
         Schema::table('recursive_tree_seat_inventory_inventory_source', function (Blueprint $table) {
             DB::statement("ALTER TABLE `recursive_tree_seat_inventory_inventory_source` CHANGE `source_type` `source_type` ENUM('corporation_hangar', 'contract', 'in_transport','fitted_ship');");
         });
-
-        UpdateInventory::dispatch()->onQueue('default');
     }
 
     public function down()
