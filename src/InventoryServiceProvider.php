@@ -15,6 +15,7 @@ use RecursiveTree\Seat\Inventory\Listeners\DoctrineUpdatedListener;
 use RecursiveTree\Seat\Inventory\Listeners\FittingUpdatedListener;
 use RecursiveTree\Seat\Inventory\Models\StockItem;
 use RecursiveTree\Seat\Inventory\Models\Workspace;
+use RecursiveTree\Seat\Inventory\Seeders\ScheduleSeeder;
 use RecursiveTree\Seat\TreeLib\Helpers\FittingPluginHelper;
 use RecursiveTree\Seat\Inventory\Jobs\GenerateStockIcon;
 use RecursiveTree\Seat\Inventory\Jobs\SendStockLevelNotifications;
@@ -74,7 +75,7 @@ class InventoryServiceProvider extends AbstractSeatPlugin
             __DIR__ . '/Config/notifications.alerts.php', 'notifications.alerts'
         );
 
-        Artisan::command('inventory:assets {--sync}', function () {
+        Artisan::command('inventory:sources:update {--sync}', function () {
             if ($this->option("sync")){
                 $this->info("processing...");
                 UpdateInventory::dispatchSync();
@@ -143,13 +144,6 @@ class InventoryServiceProvider extends AbstractSeatPlugin
             UpdateCorporationAssets::dispatchSync(Workspace::first());
         });
 
-        Queue::after(function (JobProcessed $event) {
-            $class = $event->job->resolveName();
-            if ($class == Assets::class){
-                UpdateInventory::dispatch()->onQueue('default');
-            }
-        });
-
         if(FittingPluginHelper::pluginIsAvailable()){
             Event::listen(FittingPluginHelper::FITTING_PLUGIN_FITTING_UPDATED_EVENT,FittingUpdatedListener::class);
             Event::listen(FittingPluginHelper::FITTING_PLUGIN_DOCTRINE_UPDATED_EVENT,DoctrineUpdatedListener::class);
@@ -159,6 +153,9 @@ class InventoryServiceProvider extends AbstractSeatPlugin
     public function register(){
         $this->mergeConfigFrom(__DIR__ . '/Config/inventory.sidebar.php','package.sidebar');
         $this->registerPermissions(__DIR__ . '/Config/inventory.permissions.php', 'inventory');
+        $this->registerDatabaseSeeders([
+            ScheduleSeeder::class
+        ]);
     }
 
     public function getName(): string

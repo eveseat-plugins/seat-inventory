@@ -10,7 +10,8 @@
   ],
   "autoload": {
     "psr-4": {
-      "RecursiveTree\\Seat\\Inventory\\": "src/"
+      "RecursiveTree\\Seat\\Inventory\\": "src/",
+      "RecursiveTree\\Seat\\Inventory\\Seeders\\": "src/database/seeders/"
     }
   },
   "minimum-stability": "dev",
