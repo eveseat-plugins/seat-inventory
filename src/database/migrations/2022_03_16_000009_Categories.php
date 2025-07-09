@@ -31,7 +31,7 @@ class Categories extends Migration
         // add all existing stock to a default category. We can use models since they might change
         DB::table('recursive_tree_seat_inventory_stock_categories')
             ->insert([
-                'name' => 'Default Group'
+                'name' => 'Default View'
             ]);
         $category_id = DB::table('recursive_tree_seat_inventory_stock_categories')->first()->id;
 

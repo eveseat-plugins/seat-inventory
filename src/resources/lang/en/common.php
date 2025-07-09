@@ -30,8 +30,8 @@ return [
     'filters_btn' => 'Filters',
 
     'make_permanent_btn' => 'Make Permanent',
-    'delete_group_success' => 'Successfully deleted the group',
-    'save_group_success' => 'Successfully saved group',
+    'delete_group_success' => 'Successfully deleted the view',
+    'save_group_success' => 'Successfully saved view',
 
 
     'create_alliance_industry_order' => 'Orders these items with seat-alliance-industry',
@@ -77,11 +77,11 @@ return [
 
     'error_server_response_error' => 'Server responded with an error!',
     'error_doctrine_not_found' => 'Couldn\'t find the requested doctrine!',
-    'error_failed_to_parse_group_data' => 'Failed to parse complete group data',
-    'error_failed_to_delete_group' => 'Failed to delete the group',
-    'error_failed_to_save_group' => 'Failed to save the group',
+    'error_failed_to_parse_group_data' => 'Failed to parse complete view data',
+    'error_failed_to_delete_group' => 'Failed to delete the view',
+    'error_failed_to_save_group' => 'Failed to save the view',
     'error_invalid_name_input' => 'Please enter a valid name!',
-    'error_failed_to_load_group_data' => 'Failed to load group data',
+    'error_failed_to_load_group_data' => 'Failed to load group view',
     'error_failed_to_delete_stock' => 'Failed to delete the stock',
     'error_failed_to_save_stock' => 'Failed to save the stock',
     'error_failed_to_load_items' => 'Failed to load items',

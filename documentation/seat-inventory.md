@@ -41,7 +41,7 @@ You can configure the permissions over the normal seat permission system under *
 Allows you to view the seat-inventory pages and the data on this page. As of right now, the UI still shows all buttons as if you have edit permissions, but it fails as soon as you press submit.
 
 ##### Permission Edit Inventory
-Allows you to change the configuration, create stocks and group, or generally anything that is permanently stored on the server.
+Allows you to change the configuration, create stocks and views, or generally anything that is permanently stored on the server.
 
 ##### Permission Create Workspaces
 Allows you to create new workspaces. More on them below.
@@ -91,7 +91,7 @@ Besides the workspace selector, once you open the dashboard under *Inventory man
 
 1. A location filter. More on it later
 2. A row of buttons
-3. One or more extendable group. If you just installed the module, you should see a category `Default Group`. (On older installs, it might be named differently)
+3. One or more expandable view. If you just installed the module, you should see a category `Default View`. (On older installs, it might be named differently)
 
 ### The Buttons
 
@@ -102,16 +102,17 @@ Reloads all data. You need this if two persons work on the same workspace at the
 Opens the deliveries popup. Deliveries allow you to add items that don't really exist to the item sources. My corporation uses it to mark items that are being produced or shipped to staging as already there, so they disappear from the list of missing items.
 
 #### Collapse All
-Collapses all open groups
+Collapses all open views
 
 #### Expand All
-Expands all groups
+Expands all views
 
 #### Add Stock
 Allows you to add a new stock. A stock is a definition of which and how many items should be stored where. seat-inventory then calculates what's missing or shows other statistics.
 
-#### Add Group
-Creates a new group. Groups allow you to, well, group stocks into packages which are displayed together. They can be used to for example have all ships of a doctrine together on one view.
+#### Add View
+Creates a new view. Views allow you to group stocks into packages which are displayed together. They can be used to for example have all ships of a doctrine or staging grouped together.
+A stock can be part of multiple views.
 
 ### The Location Filter
 When you have a lot of stock in different location, it can be quite troublesome to see which stocks are in which locations. When you enter a location in the filter, stock which aren't there will be faded out grey allowing you to focus on the remaining ones at the specified location.
@@ -141,25 +142,25 @@ The following properties are common to all stock types:
 
 Press save to create the stock.
 
-Note: Stocks won't appear anywhere until you add them to a group. They will still be considered for availability computation even when not in a group.
+Note: Stocks won't appear anywhere until you add them to a view. They will still be considered for availability computation even when not in a view.
 
-## Groups
-### Creating a Group
-Press the **+ Group** button at the top. A popup should open asking for a name. Below it you can expand the stocks section and add/remove stocks to the group.
-After saving, the group should appear on the dashboard page.
+## Views
+### Creating a View
+Press the **+ View** button at the top. A popup should open asking for a name. Below it you can expand the stocks section and add/remove stocks to the view.
+After saving, the view should appear on the dashboard page.
 
-### Using Groups
-When you expand a group, a card for each stock in the group appears. It contains the most important information about the stock like location, priority and availability in various location. You can edit a stock with the pen button and show even more detailed information with the info button.
+### Using Views
+When you expand a view, a card for each stock in the view appears. It contains the most important information about the stock like location, priority and availability in various location. You can edit a stock with the pen button and show even more detailed information with the info button.
 
-If you want to modify a group, there is an edit button next to the expand/collapse button. You have the same options like when you create a group.
+If you want to modify a view, there is an edit button next to the expand/collapse button. You have the same options like when you create a view.
 
-A stock can be in multiple groups at the same time. This can be useful if you have two doctrines that share a ship.
+A stock can be in multiple views at the same time. This can be useful if you have two doctrines that share a ship.
 
 ### Filters
-Filters can automatically put stocks into groups.
+Filters can automatically put stocks into views.
 
-You can edit your filters in the **edit group** window. You can currently automatically add stocks to groups by their location and doctrines. 
-If you filter by location and doctrine at the same time, both conditions need to be fulfilled for a stock to be added to the group.
+You can edit your filters in the **edit views** window. You can currently automatically add stocks to views by their location and doctrines. 
+If you filter by location and doctrine at the same time, both conditions need to be fulfilled for a stock to be added to the view.
 Even if you have filters set up, you can manually add stocks that won't be removed.
 
 ## Deliveries

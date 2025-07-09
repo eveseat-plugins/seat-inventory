@@ -1970,7 +1970,7 @@
                         .class("btn btn-primary ml-1")
                         .content(
                             W2.html("i").class("fas fa-plus"),
-                            " Group"
+                            " View"
                         )
                         .event("click", () => {
                             editCategoryPopUp(app, {})
