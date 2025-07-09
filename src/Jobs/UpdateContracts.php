@@ -5,6 +5,7 @@ namespace RecursiveTree\Seat\Inventory\Jobs;
 use DateTime;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -57,7 +58,7 @@ class UpdateContracts implements ShouldQueue
     {
         return array_merge(
             [
-                (new WithoutOverlapping($this->workspace->id))->releaseAfter(60),
+               (new WithoutOverlapping($this->workspace->id))->releaseAfter(60),
             ]
         );
     }
@@ -65,8 +66,8 @@ class UpdateContracts implements ShouldQueue
 
     public function handle()
     {
-        $corporations = TrackedCorporation::where("workspace_id",$this->workspace->id)->pluck("corporation_id");
-        $alliances = TrackedAlliance::where("workspace_id",$this->workspace->id)->pluck("alliance_id");
+        $corporations = TrackedCorporation::where("workspace_id",$this->workspace->id)->get();
+        $alliances = TrackedAlliance::where("workspace_id",$this->workspace->id)->get();
 
         DB::transaction(function () use ($alliances, $corporations) {
             $this->handleContracts($corporations, $alliances, $this->workspace->id);
@@ -78,10 +79,10 @@ class UpdateContracts implements ShouldQueue
         }
     }
 
-    private function handleContracts($corporation_ids, $alliance_ids, $workspace_id)
+    private function handleContracts($corporations, $alliances, $workspace_id)
     {
-        //collect both corporations and alliances
-        $valid_assignee_ids = $corporation_ids->merge($alliance_ids);
+        $corporation_ids = $corporations->pluck("corporation_id");
+        $alliance_ids = $alliances->pluck("alliance_id");
 
         $sources = InventorySource::where("source_type","contract")
             ->where("workspace_id", $workspace_id)
@@ -97,7 +98,22 @@ class UpdateContracts implements ShouldQueue
         $contracts = ContractDetail::where("type", "item_exchange")
             ->where("status", "outstanding")
             ->whereDate("date_expired",">",$time)
-            ->whereIn("assignee_id", $valid_assignee_ids)
+            ->where(function (Builder $query) use ($corporations, $alliance_ids) {
+                $query->whereIn("assignee_id", $alliance_ids);
+
+                foreach ($corporations as $corporation){
+                    if($corporation->include_to_corporation) {
+                        $query->orWhere("assignee_id", $corporation->corporation_id);
+                    }
+                    if($corporation->include_from_corporation) {
+                        $query->orWhere(function(Builder $query) use ($corporation) {
+                            $query
+                                ->where("issuer_corporation_id", $corporation->corporation_id)
+                                ->where("availability","public");
+                        });
+                    }
+                }
+            })
             ->get();
 
         foreach ($contracts as $contract) {

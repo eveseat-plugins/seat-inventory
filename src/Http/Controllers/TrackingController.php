@@ -74,6 +74,9 @@ class TrackingController extends Controller
         $db_entry = new TrackedCorporation();
         $db_entry->corporation_id = $request->corporation_id;
         $db_entry->workspace_id = $request->workspace;
+        $db_entry->include_to_corporation = true;
+        $db_entry->include_from_corporation = true;
+        $db_entry->include_fuel_bay = true;
         $db_entry->save();
 
         //new corporations, new assets -> we need to update
@@ -403,13 +406,17 @@ class TrackingController extends Controller
         $request->validate([
             'corporation_id'=>'required|integer',
             "workspace_id"=>"required|integer",
-            "include_fuel_bay"=>"required|boolean"
+            "include_fuel_bay"=>"required|boolean",
+            "include_to_corporation"=>"required|boolean",
+            "include_from_corporation"=>"required|boolean"
         ]);
         $corporation = TrackedCorporation::where("corporation_id",$request->corporation_id)
             ->where("workspace_id",$request->workspace_id)
             ->first();
 
         $corporation->include_fuel_bay = $request->include_fuel_bay;
+        $corporation->include_to_corporation = $request->include_to_corporation;
+        $corporation->include_from_corporation = $request->include_from_corporation;
 
         $corporation->save();
 

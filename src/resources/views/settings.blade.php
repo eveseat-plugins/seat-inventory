@@ -65,7 +65,9 @@
 
         function editCorpTracking(corp) {
             const state = {
-                include_fuel_bay: corp.include_fuel_bay > 0
+                include_fuel_bay: corp.include_fuel_bay > 0,
+                include_to_corporation: corp.include_to_corporation > 0,
+                include_from_corporation: corp.include_from_corporation > 0
             }
 
             BootstrapPopUp.open("Corporation Settings", (container, popup)=>{
@@ -90,6 +92,46 @@
                                     .content("Include Citadel Fuel Bay")
                             )
                         ),
+                    W2.html("div")
+                        .class("form-group")
+                        .content(
+                            W2.html("div")
+                                .class("custom-control custom-switch")
+                                .content(
+                                    W2.html("input")
+                                        .attribute("type","checkbox")
+                                        .id(W2.getID("editCorpTracking.fromcorp", true))
+                                        .class("custom-control-input")
+                                        .attributeIf(corp.include_to_corporation,"checked","checked")
+                                        .event("change",()=>{
+                                            state.include_to_corporation = !state.include_to_corporation
+                                        }),
+                                    W2.html("label")
+                                        .attribute("for", W2.getID("editCorpTracking.fromcorp"))
+                                        .class("custom-control-label")
+                                        .content("Include contracts assigned to corporation")
+                                )
+                        ),
+                    W2.html("div")
+                        .class("form-group")
+                        .content(
+                            W2.html("div")
+                                .class("custom-control custom-switch")
+                                .content(
+                                    W2.html("input")
+                                        .attribute("type","checkbox")
+                                        .id(W2.getID("editCorpTracking.tocorp", true))
+                                        .class("custom-control-input")
+                                        .attributeIf(corp.include_from_corporation,"checked","checked")
+                                        .event("change",()=>{
+                                            state.include_from_corporation = !state.include_from_corporation
+                                        }),
+                                    W2.html("label")
+                                        .attribute("for", W2.getID("editCorpTracking.tocorp"))
+                                        .class("custom-control-label")
+                                        .content("Include public contracts with corporation as issuer")
+                                )
+                        ),
                     W2.html("button")
                         .class("btn btn-success")
                         .content("Update")
@@ -98,6 +140,8 @@
                                 corporation_id: corp.corporation_id,
                                 workspace_id: appState.currentWorkspace.id,
                                 include_fuel_bay: state.include_fuel_bay,
+                                include_to_corporation: state.include_to_corporation,
+                                include_from_corporation: state.include_from_corporation,
                             })
                             if(!response.ok){
                                 BoostrapToast.open("Error","Failed to update corporation tracking")
