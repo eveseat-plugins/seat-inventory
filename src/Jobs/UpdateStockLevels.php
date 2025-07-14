@@ -42,7 +42,7 @@ class UpdateStockLevels implements ShouldQueue
     {
         return array_merge(
             [
-                //(new WithoutOverlapping($this->workspace_id))->releaseAfter(60),
+                (new WithoutOverlapping($this->workspace_id))->releaseAfter(60),
             ]
         );
     }

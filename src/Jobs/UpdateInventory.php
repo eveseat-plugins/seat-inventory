@@ -29,7 +29,7 @@ class UpdateInventory implements ShouldQueue
 
     public function handleWorkspace(Workspace $workspace): void
     {
-        UpdateCorporationAssets::dispatchSync($workspace);
+        UpdateCorporationAssets::dispatch($workspace);
         UpdateContracts::dispatch($workspace);
 
         foreach ($workspace->markets as $market) {
