@@ -161,6 +161,7 @@ class UpdateCorporationAssets implements ShouldQueue
 
         //go over each location
         foreach ($locations as $location) {
+            $oldest = $time;
             $item_list = [];
 
             //because laravel is weird once again, we eager load up to a depth of 3: hangar/container/item (infinite would be perfect)
@@ -168,10 +169,15 @@ class UpdateCorporationAssets implements ShouldQueue
                 ->whereIn("corporation_id", $corporation_ids)
                 ->where("location_id", $location->game_location_id)
                 ->get();
+
             foreach ($assets as $asset){
                 if(!array_key_exists($asset->corporation_id, $corporation_trackings)){
                     $corporation_trackings[$asset->corporation_id] = TrackedCorporation::where("corporation_id", $asset->corporation_id)->where("workspace_id",$workspace_id)->first();
                     logger()->error("[seat-inventory] corporation tracking settings cache incomplete!");
+                }
+
+                if($asset->updated_at->lt($oldest)) {
+                    $oldest = $asset->updated_at;
                 }
 
                 $include_fuel_bay = $corporation_trackings[$asset->corporation_id]->include_fuel_bay;
@@ -186,7 +192,7 @@ class UpdateCorporationAssets implements ShouldQueue
             InventoryItem::insert($item_list);
 
             $source = InventorySource::find($location->source_id);
-            $source->last_updated = $time;
+            $source->last_updated = $oldest;
             $source->save();
         }
     }

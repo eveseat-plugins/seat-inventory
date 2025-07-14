@@ -1930,7 +1930,7 @@
 
         function toolButtonPanelComponent(app) {
             return W2.html("div")
-                .class("d-flex flex-row align-items-center mb-3")
+                .class("d-flex flex-row align-items-center mb-1")
                 .content(
                     W2.html("button")
                         .class("btn btn-success ml-auto")
@@ -2021,6 +2021,15 @@
                     container
                         .contentIf(this.workspace, (container) => container.content(this.locationFilter.mount()))
                         .contentIf(this.workspace, toolButtonPanelComponent(this))
+                        .contentIf(this.workspace,(c)=>c.content(
+                            W2.html("div")
+                                .class("d-flex justify-content-end mb-1")
+                                .content(
+                                    W2.html("span")
+                                        .contentIf(this.workspace.data_availability!==null,`Data Availability: ${this.workspace.data_availability} EVE time or later`)
+                                        .contentIf(this.workspace.data_availability===null, "Data Availability: Will appear as soon as the first stocks are ready")
+                                )
+                        ))
                         .contentIf(this.workspace, this.categoryList)
                 })
             }

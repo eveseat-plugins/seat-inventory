@@ -10,7 +10,9 @@ class Workspace extends Model
 {
     public $timestamps = false;
 
-    protected $table = 'seat_inventory_workspaces';
+    public const TABLE = 'seat_inventory_workspaces';
+
+    protected $table = self::TABLE;
 
     public function markets(){
         return $this->hasMany(TrackedMarket::class,"workspace_id","id");

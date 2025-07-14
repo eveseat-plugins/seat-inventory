@@ -42,7 +42,7 @@ class UpdateStockLevels implements ShouldQueue
     {
         return array_merge(
             [
-                (new WithoutOverlapping($this->workspace_id))->releaseAfter(60),
+                //(new WithoutOverlapping($this->workspace_id))->releaseAfter(60),
             ]
         );
     }
@@ -126,9 +126,6 @@ class UpdateStockLevels implements ShouldQueue
 
     private function updateStockLevels()
     {
-        //get the time
-        $time = now();
-
         //fetch and group stocks
         $stock_priority_groups = Stock::with("items", "levels")
             ->where("location_id", $this->location_id)
@@ -153,25 +150,33 @@ class UpdateStockLevels implements ShouldQueue
         $sources = InventorySource::with("items")
             ->where("location_id", $this->location_id)
             ->where("workspace_id",$this->workspace_id)
-            ->get()
-            //place real, non-virtual sources first, so they get preferred when iterating over source to see if they are fulfilled
-            ->sortBy(function ($source) {
-                $source_type = $source->getSourceType();
+            ->get();
 
-                if ($source_type["virtual"]) return 2;
-                return 1;
-            })
-            //add temp data required during computation
-            ->map(function ($source) {
-                $source_type = $source->getSourceType();
-                return [
-                    "source" => $source,
-                    "used" => false,
-                    "pooled" => $source_type["pooled"],
-                    "virtual" => $source_type["virtual"],
-                    "type_name" => $source->source_type
-                ];
-            });
+        $oldest_datapoint = now();
+        foreach ($sources as $source) {
+            if($source->last_updated !== null && $source->last_updated->lt($oldest_datapoint)) {
+                $oldest_datapoint = $source->last_updated;
+            }
+        }
+
+        //place real, non-virtual sources first, so they get preferred when iterating over source to see if they are fulfilled
+        $sources = $sources->sortBy(function ($source) {
+            $source_type = $source->getSourceType();
+
+            if ($source_type["virtual"]) return 2;
+            return 1;
+        })
+        //add temp data required during computation
+        ->map(function ($source) {
+            $source_type = $source->getSourceType();
+            return [
+                "source" => $source,
+                "used" => false,
+                "pooled" => $source_type["pooled"],
+                "virtual" => $source_type["virtual"],
+                "type_name" => $source->source_type
+            ];
+        });
 
         //prepare to sort sources
         $pooled_items = collect();
@@ -322,7 +327,7 @@ class UpdateStockLevels implements ShouldQueue
                 }
 
                 //save the stock
-                $this->saveStock($stock, $time);
+                $this->saveStock($stock, $oldest_datapoint);
             }
         }
     }

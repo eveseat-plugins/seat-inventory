@@ -8,6 +8,7 @@ use RecursiveTree\Seat\Inventory\Helpers\LocationHelper;
 use RecursiveTree\Seat\Inventory\Helpers\StockHelper;
 use RecursiveTree\Seat\Inventory\Jobs\UpdateInventory;
 use RecursiveTree\Seat\Inventory\Models\Location;
+use RecursiveTree\Seat\Inventory\Models\Stock;
 use RecursiveTree\Seat\Inventory\Models\TrackedAlliance;
 use RecursiveTree\Seat\Inventory\Models\TrackedCorporation;
 use RecursiveTree\Seat\Inventory\Models\TrackedMarket;
@@ -356,7 +357,16 @@ class TrackingController extends Controller
     }
 
     public function listWorkspaces(){
-        $workspaces = Workspace::all();
+        $workspaces = Workspace::query()
+            ->select("*")
+            ->addSelect([
+                'data_availability' => Stock::query()
+                    ->select('last_updated')
+                    ->whereColumn('workspace_id', Workspace::TABLE.".id")
+                    ->orderBy("last_updated", "ASC")
+                    ->take(1)
+            ])
+            ->get();
 
         return response()->json($workspaces,200);
     }

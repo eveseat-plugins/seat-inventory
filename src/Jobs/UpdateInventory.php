@@ -7,21 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
-use RecursiveTree\Seat\Inventory\Helpers\ContractHelper;
-use RecursiveTree\Seat\Inventory\Helpers\ItemHelper;
-use RecursiveTree\Seat\Inventory\Models\InventoryItem;
 use RecursiveTree\Seat\Inventory\Models\InventorySource;
-use RecursiveTree\Seat\Inventory\Models\Location;
-use RecursiveTree\Seat\Inventory\Models\Stock;
-use RecursiveTree\Seat\Inventory\Models\TrackedAlliance;
-use RecursiveTree\Seat\Inventory\Models\TrackedCorporation;
 use RecursiveTree\Seat\Inventory\Models\Workspace;
-use Seat\Eveapi\Models\Assets\CorporationAsset;
-use Seat\Eveapi\Models\Contracts\ContractDetail;
-use Seat\Eveapi\Models\Universe\UniverseStation;
-use Seat\Eveapi\Models\Universe\UniverseStructure;
 
 class UpdateInventory implements ShouldQueue
 {
@@ -42,7 +29,7 @@ class UpdateInventory implements ShouldQueue
 
     public function handleWorkspace(Workspace $workspace): void
     {
-        UpdateCorporationAssets::dispatch($workspace);
+        UpdateCorporationAssets::dispatchSync($workspace);
         UpdateContracts::dispatch($workspace);
 
         foreach ($workspace->markets as $market) {

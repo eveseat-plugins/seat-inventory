@@ -10,6 +10,10 @@ class InventorySource extends Model
 
     protected $table = 'seat_inventory_inventory_source';
 
+    protected $casts = [
+        'last_updated' => 'datetime',
+    ];
+
     public function location(){
         return $this->hasOne(Location::class, 'id', 'location_id');
     }
