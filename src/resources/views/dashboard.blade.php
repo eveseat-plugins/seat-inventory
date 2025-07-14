@@ -1658,6 +1658,7 @@
                                                             dataEntry({!!json_encode(trans('inventory::inv.inventory_stock_amount_label'))!!}, stock.amount),
                                                             dataEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold),
                                                             dataEntry({!!json_encode(trans('inventory::common.priority_field'))!!}, getStockPriorityName(stock.priority)),
+                                                            dataEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`),
                                                             dataEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available),
                                                             (container) => {
                                                                 for (const level of stock.levels) {
