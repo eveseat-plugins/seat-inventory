@@ -34,9 +34,23 @@ class InventoryController extends Controller
             "workspace"=>"required|integer"
         ]);
 
-        $categories = StockCategory::with("stocks","stocks.location", "stocks.categories","stocks.levels")
+        $categories = StockCategory::with("stocks","stocks.location", "stocks.categories","stocks.levels","stocks.items.prices")
             ->where("workspace_id",$request->workspace)
             ->get();
+
+        foreach ($categories as $category) {
+            foreach ($category->stocks as $stock) {
+                $stock->missing_price = 0;
+                foreach($stock->items as $item){
+                    $stock->missing_price += $item->missing_items * $item->prices->sell_price ?? 0;
+                }
+
+                # don't send items along to save bandwidth
+                $stock->unsetRelation("items");
+            }
+        }
+
+
 
         return response()->json($categories->values());
     }

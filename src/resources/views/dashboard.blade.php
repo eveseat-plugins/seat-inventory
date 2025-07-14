@@ -65,7 +65,7 @@
         //stores data related to different source types
         class SourceTypeHelper {
             static #source_types = {!! json_encode(config("inventory.sources")) !!}
-            //comments after blade things prevents syntax higliting errors
+            //comments after blade things prevents syntax highlighting errors
 
             static getFullName(type_name) {
                 return this.getData(type_name).name
@@ -89,6 +89,26 @@
             })
         }
 
+        // Helper function to abbreviate numbers to their SI suffix
+        var SI_SYMBOL = ["", "k", "M", "B", "T", "P", "E"];
+        function abbreviateNumberEVE(number){
+
+            // what tier? (determines SI symbol)
+            var tier = Math.log10(number) / 3 | 0;
+
+            // if zero, we don't need a suffix
+            if(tier == 0) return number.toFixed(1);
+
+            // get suffix and determine scale
+            var suffix = SI_SYMBOL[tier];
+            var scale = Math.pow(10, tier * 3);
+
+            // scale the number
+            var scaled = number / scale;
+
+            // format number and add suffix
+            return scaled.toFixed(1) + suffix;
+        }
 
         class LocationFilterComponent extends W2.W2Component {
             locationListeners
@@ -757,6 +777,7 @@
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.priority_field'))!!}, getStockPriorityName(stock.priority)))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.planned_field'))!!}, stock.amount))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold))
+                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available, availabilityColor))
                         .content((container) => {
                             const sorted = stock.levels.sort((a, b) => b.amount - a.amount)

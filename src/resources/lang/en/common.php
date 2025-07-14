@@ -53,6 +53,7 @@ return [
     'last_updated_field' => 'Last Updated',
     'minimal_amount_fullfilled_field' => 'Minimal amount fulfilled',
     'fitting_link_field' => 'Linked to a fitting',
+    'missing_price' => 'Missing Items',
 
     'attributes_header' => 'Attributes',
     'attribute_header' => 'Attribute',

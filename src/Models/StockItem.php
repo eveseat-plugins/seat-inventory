@@ -3,6 +3,8 @@
 namespace RecursiveTree\Seat\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Seat\Eveapi\Models\Market\Price;
 use Seat\Eveapi\Models\Sde\InvType;
 
 class StockItem extends Model implements ItemEntry
@@ -13,11 +15,13 @@ class StockItem extends Model implements ItemEntry
 
     protected $table = self::TABLE;
 
-    public function stock(){
+    public function stock(): HasOne
+    {
         return $this->hasOne(Stock::class, "id", "stock_id");
     }
 
-    public function type(){
+    public function type(): HasOne
+    {
         return $this->hasOne(InvType::class, 'typeID', 'type_id');
     }
 
@@ -38,5 +42,10 @@ class StockItem extends Model implements ItemEntry
                 return new ItemEntryBasic($item->type_id,$item[$amount_column]);
             })->values()
         );
+    }
+
+    public function prices(): HasOne
+    {
+        return $this->hasOne(Price::class, 'type_id', 'type_id');
     }
 }
