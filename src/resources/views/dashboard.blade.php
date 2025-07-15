@@ -740,7 +740,8 @@
                                 .class("card-title mr-auto")
                                 .content(
                                     W2.html("span")
-                                        .class("text-primary")
+                                        .classIf(!stock.invalid_fitting,"text-primary")
+                                        .classIf(stock.invalid_fitting,"text-danger")
                                         .attribute("href", `/inventory/stocks/view/${stock.id}`)
                                         .content(stock.name)
                                 )
@@ -984,7 +985,7 @@
                     multibuy: "", //for existing stocks, the data is loaded after the ui code, as it needs access to the mount
                     fit: "",
                     name: stock.name || "",
-                    pluginFit: stock.fitting_plugin_fitting_id ? {
+                    pluginFit: stock.fitting_plugin_fitting_id && stock.invalid_fitting!==true ? {
                         id: stock.fitting_plugin_fitting_id,
                         text: stock.name // should be synchrnoized with the fitting name
                     } : null,

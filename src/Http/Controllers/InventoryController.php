@@ -45,6 +45,12 @@ class InventoryController extends Controller
                     $stock->missing_price += $item->missing_items * $item->prices->sell_price ?? 0;
                 }
 
+                if(FittingPluginHelper::pluginIsAvailable()) {
+                    $stock->invalid_fitting = $stock->fitting_plugin_fitting_id != null && !$stock->fitting_plugin()->exists();
+                } else {
+                    $stock->invalid_fitting = false;
+                }
+
                 # don't send items along to save bandwidth
                 $stock->unsetRelation("items");
             }

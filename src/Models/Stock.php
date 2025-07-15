@@ -23,6 +23,10 @@ class Stock extends Model
         return $this->hasOne(Location::class, 'id', 'location_id');
     }
 
+    public function fitting_plugin(){
+        return $this->hasOne(FittingPluginHelper::$FITTING_PLUGIN_FITTING_MODEL, 'fitting_id', 'fitting_plugin_fitting_id');
+    }
+
     public function items()
     {
         return $this->hasMany(StockItem::class,"stock_id","id");
