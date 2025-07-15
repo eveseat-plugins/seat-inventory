@@ -390,11 +390,11 @@ class TrackingController extends Controller
     }
 
     public function editWorkspace(Request $request){
-
         $request->validate([
             "workspace"=>"required|integer",
             "name"=>"required|string",
-            "enableNotifications"=>"required|boolean"
+            "enableNotifications"=>"required|boolean",
+            "enableStockingPrices"=>"required|boolean"
         ]);
 
         $workspace = Workspace::find($request->workspace);
@@ -405,6 +405,7 @@ class TrackingController extends Controller
 
         $workspace->name = $request->name;
         $workspace->enable_notifications = $request->enableNotifications;
+        $workspace->enable_stocking_prices = $request->enableStockingPrices;
 
         $workspace->save();
 

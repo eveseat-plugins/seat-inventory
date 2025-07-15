@@ -46,4 +46,6 @@ return [
     'error_remove_members' => 'Failed to add members of',
     'error_adding_corporations' => 'Failed to add',
     'error_removing_markets' => 'Failed to add members of',
+
+    'enable_stocking_prices' => 'Display stocking price target for stocks'
 ];

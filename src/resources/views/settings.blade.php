@@ -164,7 +164,8 @@
             markets: [],
             currentWorkspace: null,
             newWorkspaceName: null,
-            newEnableNotifications: null
+            newEnableNotifications: null,
+            newEnableStockingPrices: null
         }
 
 
@@ -232,9 +233,25 @@
                                         .attribute("for", W2.getID("editWSNotifications"))
                                         .content({!!json_encode(trans('inventory::settings.notifications_label'))!!}),
                                 ),
+                            // enable contract pricing for stocks
+                            W2.html("div")
+                                .class("form-check")
+                                .content(
+                                    W2.html("input")
+                                        .attribute("id", W2.getID("editWSStockingPrices", true))
+                                        .class("form-check-input")
+                                        .attribute("type", "checkbox")
+                                        .attributeIf(appState.newEnableStockingPrices !== null ? appState.newEnableStockingPrices : (appState.currentWorkspace !== null ? appState.currentWorkspace.enable_stocking_prices === 1 : false), "checked", "checked")
+                                        .event("change", (e) => {
+                                            appState.newEnableStockingPrices = e.target.checked === true
+                                        }),
+                                    W2.html("label")
+                                        .attribute("for", W2.getID("editWSStockingPrices"))
+                                        .content({!!json_encode(trans('inventory::settings.enable_stocking_prices'))!!}),
+                                ),
                             //submit
                             W2.html("div")
-                                .class("form-group")
+                                .class("form-group mb-0")
                                 .content(
                                     W2.html("button")
                                         .class("btn btn-primary mr-1")
@@ -243,7 +260,8 @@
                                             const data = {
                                                 workspace: appState.currentWorkspace.id,
                                                 name: appState.newWorkspaceName || appState.currentWorkspace.name,
-                                                enableNotifications: appState.newEnableNotifications !== null ? appState.newEnableNotifications : (appState.currentWorkspace.enable_notifications === 1)
+                                                enableNotifications: appState.newEnableNotifications !== null ? appState.newEnableNotifications : (appState.currentWorkspace.enable_notifications === 1),
+                                                enableStockingPrices: appState.newEnableStockingPrices !== null ? appState.newEnableStockingPrices : (appState.currentWorkspace.enable_stocking_prices === 1)
                                             }
 
                                             const response = await jsonPostAction("{{route("inventory.editWorkspace")}}", data)

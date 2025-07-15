@@ -716,7 +716,7 @@
                 )
         }
 
-        function stockCardComponent(app, stock, location) {
+        function stockCardComponent(app, stock, location, workspace) {
             const available = stock.available
 
             let availabilityColor = null
@@ -777,8 +777,9 @@
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.priority_field'))!!}, getStockPriorityName(stock.priority)))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.planned_field'))!!}, stock.amount))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available, availabilityColor))
+                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
+                        .contentIf(workspace.enable_stocking_prices,stockCardPropertyEntry("asd","asd"))
                         .content((container) => {
                             const sorted = stock.levels.sort((a, b) => b.amount - a.amount)
 
@@ -856,7 +857,7 @@
                                         container.content(W2.html("span").content({!!json_encode(trans('inventory::inv.inventory_empty_stock'))!!}))
                                     }
                                     for (const stock of category.stocks) {
-                                        container.content(stockCardComponent(app, stock, location))
+                                        container.content(stockCardComponent(app, stock, location, app.workspace))
                                     }
                                 })
                         )
@@ -940,7 +941,7 @@
                                 category,
                                 state.isCollapsed(category.id),
                                 (id) => state.toggleCollapse(id),
-                                state.location
+                                state.location,
                             )
                         )
                     }
