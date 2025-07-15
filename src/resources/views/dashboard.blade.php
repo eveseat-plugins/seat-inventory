@@ -792,15 +792,7 @@
                                 }
                             }
 
-                            if (sorted.length > 3) {
-                                addEntry(0)
-                                addEntry(1)
-                                container.content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.locations_other_header'))!!}, sorted.slice(2).reduce((p, c) => p + c.amount, 0)))
-                            } else {
-                                addEntry(0)
-                                addEntry(1)
-                                addEntry(2)
-                            }
+                            addEntry(0)
                         })
                 )
         }
