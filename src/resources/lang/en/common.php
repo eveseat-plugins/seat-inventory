@@ -91,4 +91,6 @@ return [
     'error_failed_to_load_deliveries' => 'Failed to load deliveries',
     'error_remove_object' => 'Failed to remove',
     'error_adding_object' => 'Failed to add',
+
+    'contract_stocking_price' => 'Contract Price',
 ];

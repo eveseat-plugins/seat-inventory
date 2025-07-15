@@ -779,7 +779,7 @@
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available, availabilityColor))
                         .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
-                        .contentIf(workspace.enable_stocking_prices,stockCardPropertyEntry("asd","asd"))
+                        .contentIf(workspace.enable_stocking_prices,stockCardPropertyEntry({!!json_encode(trans('inventory::common.contract_stocking_price'))!!},`${stock.contract_stocking_price.toLocaleString("en-gb")} ISK`))
                         .content((container) => {
                             const sorted = stock.levels.sort((a, b) => b.amount - a.amount)
 
@@ -956,7 +956,8 @@
             amount: null,
             warning_threshold: null,
             location: null,
-            priority: null
+            priority: null,
+            contract_stocking_price: null
         }
 
         //stock creation and edit button
@@ -985,6 +986,7 @@
                     type: stock.fitting_plugin_fitting_id ? "plugin" : StockCreationDefaults.type || "multibuy",
                     amount: stock.amount || StockCreationDefaults.amount || 1,
                     warning_threshold: stock.warning_threshold || StockCreationDefaults.warning_threshold || 1,
+                    contract_stocking_price: stock.contract_stocking_price || StockCreationDefaults.contract_stocking_price || 0,
                     location, //conversion from json see above
                     priority: stock.priority || StockCreationDefaults.priority || 1,
                     multibuy: "", //for existing stocks, the data is loaded after the ui code, as it needs access to the mount
@@ -1198,6 +1200,27 @@
                                     })
                             )
                     )
+                    // contract stocking price
+                    container.content(
+                        W2.html("div")
+                            .class("form-group")
+                            .content(
+                                W2.html("label")
+                                    .attribute("for", W2.getID("editStockContractStockingPrice", true))
+                                    .content({!!json_encode(trans('inventory::common.contract_stocking_price'))!!}),
+                                W2.html("input")
+                                    .class("form-control")
+                                    .id(W2.getID("editStockContractStockingPrice"))
+                                    .attribute("type", "number")
+                                    .attribute("value", state.contract_stocking_price)
+                                    .event("change", (e) => {
+                                        //update the state and rerender
+                                        state.contract_stocking_price = e.currentTarget.value
+                                        StockCreationDefaults.contract_stocking_price = state.contract_stocking_price
+                                        //no need to update the ui
+                                    })
+                            )
+                    )
                     //location
                     container.content(
                         W2.html("div")
@@ -1363,7 +1386,8 @@
                                             amount: state.amount,
                                             warning_threshold: state.warning_threshold,
                                             priority: state.priority,
-                                            workspace: app.workspace.id
+                                            workspace: app.workspace.id,
+                                            contract_stocking_price: state.contract_stocking_price
                                         }
                                         if (state.type === "fit") {
                                             data.fit = state.fit

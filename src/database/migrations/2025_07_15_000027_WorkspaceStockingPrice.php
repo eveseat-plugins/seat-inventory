@@ -13,12 +13,20 @@ return new class extends Migration
         Schema::table("seat_inventory_workspaces",function (Blueprint $table){
             $table->boolean("enable_stocking_prices")->default(false);
         });
+
+        Schema::table("seat_inventory_stocks",function (Blueprint $table){
+            $table->bigInteger("contract_stocking_price")->unsigned()->default(0);
+        });
     }
 
     public function down()
     {
         Schema::table("seat_inventory_workspaces",function (Blueprint $table){
             $table->dropColumn("enable_stocking_prices");
+        });
+
+        Schema::table("seat_inventory_stocks",function (Blueprint $table){
+            $table->dropColumn("contract_stocking_price");
         });
     }
 };
