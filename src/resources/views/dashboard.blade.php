@@ -729,27 +729,35 @@
             const cardDivRef = W2.useRef()
             const cardInsertionPosRef = W2.useRef()
             const dragRefCounter = W2.useRef(0)
+            const id = W2.useID()
 
             return W2.html("div")
                 .class("m-1 d-flex flex-row stock-reorder-drag-and-drop")
                 .ref(cardDivRef)
-                .id(W2.getID("stock-id", true))
+                .id(id)
                 .event("dragover",(ev)=>{
+                    if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
                     ev.preventDefault() // this event is needed per spec
                 })
                 .event("dragenter",(ev)=>{
+                    if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
+
                     dragRefCounter.current += 1
                     if(dragRefCounter.current > 0){
                         cardInsertionPosRef.current.style.display = ""
                     }
                 })
                 .event("dragleave",(ev)=>{
+                    if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
+
                     dragRefCounter.current -= 1
                     if(dragRefCounter.current < 1){
                         cardInsertionPosRef.current.style.display = "none"
                     }
                 })
                 .event("drop",(ev)=>{
+                    if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
+
                     ev.preventDefault();
                     // hide drag position preview
                     cardInsertionPosRef.current.style.display = "none"
@@ -784,7 +792,7 @@
                                 .event("dragstart",(ev)=>{
                                     ev.dataTransfer.setData("application/x-seat-inventory-view-stock", JSON.stringify({
                                         stock_id: stock.id,
-                                        id: W2.getID("stock-id", false)
+                                        id: id
                                     }))
                                     ev.dataTransfer.dropEffect = "move"
                                     const rect = cardDivRef.current.getBoundingClientRect();

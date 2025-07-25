@@ -314,6 +314,10 @@ const W2 = function () {
         }
     }
 
+    function useID() {
+        return getID("__w2_useID__",true)
+    }
+
     return {
         html: W2HtmlNode.new,
         emptyHtml: W2HtmlNode.empty,
@@ -324,6 +328,7 @@ const W2 = function () {
         W2MountState,
         getID,
         restoreScrollPosition,
-        useRef
+        useRef,
+        useID
     }
 }()
