@@ -726,75 +726,136 @@
                 availabilityColor = "warning"
             }
 
+            const cardDivRef = W2.useRef()
+            const cardInsertionPosRef = W2.useRef()
+            const dragRefCounter = W2.useRef(0)
+
             return W2.html("div")
-                .class("card m-1")
-                .style("width", "16rem")
+                .class("m-1 d-flex flex-row stock-reorder-drag-and-drop")
+                .ref(cardDivRef)
+                .id(W2.getID("stock-id", true))
+                .event("dragover",(ev)=>{
+                    ev.preventDefault() // this event is needed per spec
+                })
+                .event("dragenter",(ev)=>{
+                    dragRefCounter.current += 1
+                    if(dragRefCounter.current > 0){
+                        cardInsertionPosRef.current.style.display = ""
+                    }
+                })
+                .event("dragleave",(ev)=>{
+                    dragRefCounter.current -= 1
+                    if(dragRefCounter.current < 1){
+                        cardInsertionPosRef.current.style.display = "none"
+                    }
+                })
+                .event("drop",(ev)=>{
+                    ev.preventDefault();
+                    // hide drag position preview
+                    cardInsertionPosRef.current.style.display = "none"
+                    dragRefCounter.current = 0
+                    // execute drag and drop operation
+                    const data = JSON.parse(ev.dataTransfer.getData("application/x-seat-inventory-view-stock"));
+                    console.log(stock.id, data)
+
+                    // swap elements in UI immediately
+                    const fullTargetStockCard = ev.target.closest(".stock-reorder-drag-and-drop")
+                    const fullSourceStockCard = document.getElementById(data.id)
+                    fullTargetStockCard.parentNode.insertBefore(fullSourceStockCard, fullTargetStockCard)
+                })
                 .styleIf(location !== null && location !== stock.location_id, "opacity", "0.5")
                 .content(
-                    //card header
                     W2.html("div")
-                        .class("card-header d-flex align-items-baseline")
-                        .style("padding-right", "0.75rem")
+                        .ref(cardInsertionPosRef)
+                        .style("display", "none")
+                        .style("background-color", "blue")
+                        .style("width", "0.2rem")
+                        .style("margin-bottom", "1rem")
+                        .style("margin-right", "0.5rem")
+                )
+                .content(
+                    W2.html("div")
+                        .class("card d-flex flex-column")
+                        .style("width", "16rem")
                         .content(
-                            W2.html("h5")
-                                .class("card-title mr-auto")
+                            //card header
+                            W2.html("div")
+                                .attribute("draggable",true)
+                                .event("dragstart",(ev)=>{
+                                    ev.dataTransfer.setData("application/x-seat-inventory-view-stock", JSON.stringify({
+                                        stock_id: stock.id,
+                                        id: W2.getID("stock-id", false)
+                                    }))
+                                    ev.dataTransfer.dropEffect = "move"
+                                    const rect = cardDivRef.current.getBoundingClientRect();
+                                    const offsetX = ev.clientX - rect.left
+                                    const offsetY = ev.clientY - rect.top
+                                    ev.dataTransfer.setDragImage(cardDivRef.current,offsetX, offsetY)
+                                })
+                                .class("card-header d-flex align-items-baseline w-100")
+                                .style("padding-right", "0.75rem")
                                 .content(
-                                    W2.html("span")
-                                        .classIf(!stock.invalid_fitting,"text-primary")
-                                        .classIf(stock.invalid_fitting,"text-danger")
-                                        .attribute("href", `/inventory/stocks/view/${stock.id}`)
-                                        .content(stock.name)
+                                    W2.html("h5")
+                                        .class("card-title mr-auto")
+                                        .content(
+                                            W2.html("span")
+                                                .classIf(!stock.invalid_fitting,"text-primary")
+                                                .classIf(stock.invalid_fitting,"text-danger")
+                                                .attribute("href", `/inventory/stocks/view/${stock.id}`)
+                                                .content(stock.name)
+                                        )
+                                )
+                                .content(
+                                    W2.html("i")
+                                        .class("fas fa-pen text-primary")
+                                        .style("cursor", "pointer")
+                                        .event("click", () => {
+                                            editStockPopUp(app, stock)
+                                        })
+                                )
+                                .content(
+                                    W2.html("i")
+                                        .class("fas fa-info text-primary ml-2")
+                                        .style("cursor", "pointer")
+                                        .event("click", () => {
+                                            stockInfoPopUp(app, stock)
+                                        })
                                 )
                         )
+                        //card body
                         .content(
-                            W2.html("i")
-                                .class("fas fa-pen text-primary")
-                                .style("cursor", "pointer")
-                                .event("click", () => {
-                                    editStockPopUp(app, stock)
-                                })
+                            W2.html("img")
+                                .attribute("src", `/inventory/stocks/icon/${stock.id}`)
+                                .attribute("loading", "lazy")
+                                .attribute("alt", `Icons of the most important items in ${stock.name}`)
+                                .class("w-100")
+
                         )
                         .content(
-                            W2.html("i")
-                                .class("fas fa-info text-primary ml-2")
-                                .style("cursor", "pointer")
-                                .event("click", () => {
-                                    stockInfoPopUp(app, stock)
+                            W2.html("ul")
+                                .class("list-group list-group-flush w-100")
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.location_field'))!!}, stock.location.name))
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.priority_field'))!!}, getStockPriorityName(stock.priority)))
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.planned_field'))!!}, stock.amount))
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold))
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available, availabilityColor))
+                                .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
+                                .contentIf(workspace.enable_stocking_prices,stockCardPropertyEntry({!!json_encode(trans('inventory::common.contract_stocking_price'))!!},`${stock.contract_stocking_price.toLocaleString("en-gb")} ISK`))
+                                .content((container) => {
+                                    const sorted = stock.levels.sort((a, b) => b.amount - a.amount)
+
+                                    const addEntry = (index) => {
+                                        const level = sorted[index]
+                                        if (level) {
+                                            container.content(stockCardPropertyEntry(SourceTypeHelper.getFullName(level.source_type), level.amount))
+                                        } else {
+                                            container.content(stockCardPropertyEntry("\u200b", "\u200b"))
+                                        }
+                                    }
+
+                                    addEntry(0)
                                 })
                         )
-                )
-                //card body
-                .content(
-                    W2.html("img")
-                        .attribute("src", `/inventory/stocks/icon/${stock.id}`)
-                        .attribute("loading", "lazy")
-                        .attribute("alt", `Icons of the most important items in ${stock.name}`)
-                        .style("width", "100%")
-                )
-                .content(
-                    W2.html("ul")
-                        .class("list-group list-group-flush")
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.location_field'))!!}, stock.location.name))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.priority_field'))!!}, getStockPriorityName(stock.priority)))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.planned_field'))!!}, stock.amount))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.warning_threshold_field'))!!}, stock.warning_threshold))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.available_field'))!!}, available, availabilityColor))
-                        .content(stockCardPropertyEntry({!!json_encode(trans('inventory::common.missing_price'))!!}, `${abbreviateNumberEVE(stock.missing_price)} ISK`))
-                        .contentIf(workspace.enable_stocking_prices,stockCardPropertyEntry({!!json_encode(trans('inventory::common.contract_stocking_price'))!!},`${stock.contract_stocking_price.toLocaleString("en-gb")} ISK`))
-                        .content((container) => {
-                            const sorted = stock.levels.sort((a, b) => b.amount - a.amount)
-
-                            const addEntry = (index) => {
-                                const level = sorted[index]
-                                if (level) {
-                                    container.content(stockCardPropertyEntry(SourceTypeHelper.getFullName(level.source_type), level.amount))
-                                } else {
-                                    container.content(stockCardPropertyEntry("\u200b", "\u200b"))
-                                }
-                            }
-
-                            addEntry(0)
-                        })
                 )
         }
 

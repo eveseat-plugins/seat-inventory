@@ -59,6 +59,12 @@ const W2 = function () {
             this.domNode = domNode
         }
 
+        ref(ref){
+            ref.current = this.domNode
+
+            return this
+        }
+
         content(...args){
             for (const arg of args) {
                 if(W2HtmlUtils.isDOMNode(arg)){
@@ -302,6 +308,12 @@ const W2 = function () {
         element.scrollTop = position
     }
 
+    function useRef(initial=undefined) {
+        return {
+            current: initial
+        }
+    }
+
     return {
         html: W2HtmlNode.new,
         emptyHtml: W2HtmlNode.empty,
@@ -311,6 +323,7 @@ const W2 = function () {
         W2Component,
         W2MountState,
         getID,
-        restoreScrollPosition
+        restoreScrollPosition,
+        useRef
     }
 }()
