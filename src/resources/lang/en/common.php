@@ -91,6 +91,9 @@ return [
     'error_failed_to_load_deliveries' => 'Failed to load deliveries',
     'error_remove_object' => 'Failed to remove',
     'error_adding_object' => 'Failed to add',
+    'error_failed_to_change_stock_order' => 'Failed to change stock order',
+
+    'cannot_drag_stocks_across_views' => 'Cannot drag stocks across categories',
 
     'contract_stocking_price' => 'Contract Price',
 ];

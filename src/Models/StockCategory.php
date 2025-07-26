@@ -16,7 +16,7 @@ class StockCategory extends Model
             "seat_inventory_stock_category_mapping",
             "category_id",
             "stock_id"
-        )->withPivot('manually_added','category_eligible');
+        )->withPivot('manually_added','category_eligible')->using(StockCategoryMapping::class);
     }
 
     public function location(){

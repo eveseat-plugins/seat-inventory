@@ -101,6 +101,12 @@ Route::group([
         'middleware' => 'can:inventory.edit_inventory'
     ]);
 
+    Route::post('/categories/stocks/reorder', [
+        'as'   => 'inventory.changeStockOrder',
+        'uses' => 'InventoryController@changeStockOrder',
+        'middleware' => 'can:inventory.edit_inventory'
+    ]);
+
 
 
     //stock routes

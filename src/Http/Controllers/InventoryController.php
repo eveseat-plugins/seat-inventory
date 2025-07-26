@@ -5,6 +5,7 @@ namespace RecursiveTree\Seat\Inventory\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
+use RecursiveTree\Seat\Inventory\Models\StockCategoryMapping;
 use RecursiveTree\Seat\Inventory\Models\Workspace;
 use RecursiveTree\Seat\TreeLib\Helpers\AllianceIndustryPluginHelper;
 use RecursiveTree\Seat\TreeLib\Helpers\FittingPluginHelper;
@@ -34,8 +35,16 @@ class InventoryController extends Controller
             "workspace"=>"required|integer"
         ]);
 
-        $categories = StockCategory::with("stocks","stocks.location", "stocks.categories","stocks.levels","stocks.items.prices")
-            ->where("workspace_id",$request->workspace)
+        $categories = StockCategory::with([
+                "stocks" => function ($query) {
+                    $query->orderBy("list_order");
+                },
+                "stocks.location",
+                "stocks.categories",
+                "stocks.levels",
+                "stocks.items.prices"]
+        )
+            ->where("workspace_id", $request->workspace)
             ->get();
 
         foreach ($categories as $category) {
@@ -487,6 +496,51 @@ class InventoryController extends Controller
             "missing_items"=>$missing_item_list->asJsonStructure(),
             "all"=>$all_item_list->asJsonStructure()
         ]);
+    }
+
+    public function changeStockOrder(Request $request)
+    {
+        $request->validate([
+            "stock_id" => "required|integer",
+            "target_id" => "required|integer",
+            "category_id" => "required|integer",
+            "before" => "required|boolean",
+        ]);
+
+        $target = StockCategoryMapping::where("stock_id",$request->target_id) // the drop target
+            ->where("category_id", $request->category_id)
+            ->first();
+
+        if($target === null) return response()->json([],400);
+
+        // step zero: unstack stacked list_orders by incrementing all stocks, except the target, with a list order >= the target
+        DB::table($target->getTable())
+            ->where("category_id", $request->category_id)
+            ->where("list_order",">=", $target->list_order)
+            ->where("stock_id","!=",$request->target_id)
+            ->update([
+                "list_order"=>DB::raw('list_order+1')
+            ]);
+
+        // step two: create space
+        // there might be multiple stocks with the same list order, meaning we can't just move all stocks with list_order > target->list_order
+        $compare_operation = $request->before?">=":">";
+        DB::table($target->getTable())
+            ->where("category_id", $request->category_id)
+            ->where("list_order",$compare_operation, $target->list_order)
+            ->update([
+                "list_order"=>DB::raw('list_order+1')
+            ]);
+
+        // step three: update list
+        DB::table($target->getTable())
+            ->where("category_id", $request->category_id)
+            ->where("stock_id",$request->stock_id)
+            ->update([
+                'list_order'=>$target->list_order + ($request->before ? 0 : 1)
+            ]);
+
+        return response()->json([]);
     }
 
     public function about(){

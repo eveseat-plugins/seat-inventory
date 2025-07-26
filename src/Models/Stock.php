@@ -42,7 +42,7 @@ class Stock extends Model
             "seat_inventory_stock_category_mapping",
             "stock_id",
             "category_id"
-        )->withPivot('manually_added','category_eligible');
+        )->withPivot('manually_added','category_eligible')->using(StockCategoryMapping::class);
     }
 
     public function getIcon(){

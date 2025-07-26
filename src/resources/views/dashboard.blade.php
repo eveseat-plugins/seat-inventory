@@ -716,7 +716,7 @@
                 )
         }
 
-        function stockCardComponent(app, stock, location, workspace) {
+        function stockCardComponent(app, stock, location, workspace, category) {
             const available = stock.available
 
             let availabilityColor = null
@@ -727,63 +727,106 @@
             }
 
             const cardDivRef = W2.useRef()
-            const cardInsertionPosRef = W2.useRef()
+            const cardInsertionPosRefBefore = W2.useRef()
+            const cardInsertionPosRefAfter = W2.useRef()
             const dragRefCounter = W2.useRef(0)
             const id = W2.useID()
 
+            function updateDragAndDropPreview(ev) {
+                const rect = cardDivRef.current.getBoundingClientRect();
+                const transitionPoint = rect.left + rect.width/2;
+                const isLeft = ev.clientX < transitionPoint
+
+                if(dragRefCounter.current > 0){
+                    if(isLeft) {
+                        cardInsertionPosRefBefore.current.style.display = ""
+                        cardInsertionPosRefAfter.current.style.display = "none"
+                    } else {
+                        cardInsertionPosRefBefore.current.style.display = "none"
+                        cardInsertionPosRefAfter.current.style.display = ""
+                    }
+                } else {
+                    cardInsertionPosRefBefore.current.style.display = "none"
+                    cardInsertionPosRefAfter.current.style.display = "none"
+                }
+
+                return isLeft
+            }
+
             return W2.html("div")
-                .class("m-1 d-flex flex-row stock-reorder-drag-and-drop")
+                .class("d-flex flex-row stock-reorder-drag-and-drop")
                 .ref(cardDivRef)
                 .id(id)
                 .event("dragover",(ev)=>{
                     if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
                     ev.preventDefault() // this event is needed per spec
+                    updateDragAndDropPreview(ev)
                 })
                 .event("dragenter",(ev)=>{
                     if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
 
                     dragRefCounter.current += 1
-                    if(dragRefCounter.current > 0){
-                        cardInsertionPosRef.current.style.display = ""
-                    }
+                    updateDragAndDropPreview(ev)
                 })
                 .event("dragleave",(ev)=>{
                     if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
 
                     dragRefCounter.current -= 1
-                    if(dragRefCounter.current < 1){
-                        cardInsertionPosRef.current.style.display = "none"
-                    }
+                    updateDragAndDropPreview(ev)
                 })
-                .event("drop",(ev)=>{
+                .event("drop",async (ev)=>{
                     if(!ev.dataTransfer.types.includes("application/x-seat-inventory-view-stock")) return;
 
                     ev.preventDefault();
+
                     // hide drag position preview
-                    cardInsertionPosRef.current.style.display = "none"
                     dragRefCounter.current = 0
+                    const isLeftOfTargetCard = updateDragAndDropPreview(ev)
+
                     // execute drag and drop operation
                     const data = JSON.parse(ev.dataTransfer.getData("application/x-seat-inventory-view-stock"));
-                    console.log(stock.id, data)
+
+                    if(data.category_id !== category.id) {
+                        BoostrapToast.open({!!json_encode(trans('inventory::inv.inventory_group_label'))!!}, {!!json_encode(trans('inventory::common.cannot_drag_stocks_across_views'))!!})
+                        return
+                    }
 
                     // swap elements in UI immediately
                     const fullTargetStockCard = ev.target.closest(".stock-reorder-drag-and-drop")
                     const fullSourceStockCard = document.getElementById(data.id)
-                    fullTargetStockCard.parentNode.insertBefore(fullSourceStockCard, fullTargetStockCard)
+                    if(isLeftOfTargetCard){
+                        fullTargetStockCard.parentNode.insertBefore(fullSourceStockCard, fullTargetStockCard)
+                    } else {
+                        fullTargetStockCard.parentNode.insertBefore(fullSourceStockCard, fullTargetStockCard.nextSibling)
+                    }
+
+                    const response = await jsonPostAction("{{ route("inventory.changeStockOrder") }}", {
+                        stock_id: data.stock_id,
+                        target_id: stock.id,
+                        category_id: category.id,
+                        before: isLeftOfTargetCard
+                    })
+
+                    //check response status
+                    if (!response.ok) {
+                        BoostrapToast.open({!!json_encode(trans('inventory::inv.inventory_group_label'))!!}, {!!json_encode(trans('inventory::common.error_failed_to_change_stock_order'))!!})
+                    }
+
+                    //reload categories
+                    app.categoryList.state.loadData()
                 })
                 .styleIf(location !== null && location !== stock.location_id, "opacity", "0.5")
                 .content(
                     W2.html("div")
-                        .ref(cardInsertionPosRef)
+                        .ref(cardInsertionPosRefBefore)
+                        .class("mx-1")
                         .style("display", "none")
                         .style("background-color", "blue")
                         .style("width", "0.2rem")
-                        .style("margin-bottom", "1rem")
-                        .style("margin-right", "0.5rem")
                 )
                 .content(
                     W2.html("div")
-                        .class("card d-flex flex-column")
+                        .class("m-1 card d-flex flex-column")
                         .style("width", "16rem")
                         .content(
                             //card header
@@ -792,6 +835,7 @@
                                 .event("dragstart",(ev)=>{
                                     ev.dataTransfer.setData("application/x-seat-inventory-view-stock", JSON.stringify({
                                         stock_id: stock.id,
+                                        category_id: category.id,
                                         id: id
                                     }))
                                     ev.dataTransfer.dropEffect = "move"
@@ -865,6 +909,14 @@
                                 })
                         )
                 )
+                .content(
+                    W2.html("div")
+                        .ref(cardInsertionPosRefAfter)
+                        .class("mx-1")
+                        .style("display", "none")
+                        .style("background-color", "blue")
+                        .style("width", "0.2rem")
+                )
         }
 
         function categoryComponent(app, category, collapsed, toggleCollapse, location) {
@@ -919,7 +971,7 @@
                                         container.content(W2.html("span").content({!!json_encode(trans('inventory::inv.inventory_empty_stock'))!!}))
                                     }
                                     for (const stock of category.stocks) {
-                                        container.content(stockCardComponent(app, stock, location, app.workspace))
+                                        container.content(stockCardComponent(app, stock, location, app.workspace, category))
                                     }
                                 })
                         )
