@@ -246,7 +246,14 @@ class UpdateStockLevels implements ShouldQueue
             $item_demand = collect();
             foreach ($stock_priority_group as &$stock) {
                 //skip stocks which are fulfilled
-                if ($stock["remaining"] < 1) continue;
+                if ($stock["remaining"] < 1) {
+                    // we still have to update items->missing_items
+                    foreach ($stock["stock"]->items as &$item) {
+                        $item->missing_items = 0;
+                    }
+
+                    continue;
+                }
 
                 //adjust items for remaining amount
                 $item_demand->push($stock["stock"]->items->map(function ($item) use ($stock) {
