@@ -936,7 +936,7 @@
                                 )
                                 .content(
                                     W2.html("button")
-                                        .class("btn btn-secondary mx-1")
+                                        .class("btn btn-secondary mr-2")
                                         .content(
                                             W2.html("i").class("fas fa-info")
                                         )
@@ -944,7 +944,7 @@
                                 )
                                 .content(
                                     W2.html("button")
-                                        .class("btn btn-secondary mx-1")
+                                        .class("btn btn-secondary mr-2")
                                         .content(
                                             W2.html("i").class("fas fa-pen")
                                         )
