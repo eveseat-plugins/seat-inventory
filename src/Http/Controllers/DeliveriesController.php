@@ -86,7 +86,7 @@ class DeliveriesController extends Controller
             InventorySource::destroy($id);
 
             //update stock levels for new stock
-            UpdateStockLevels::dispatch($source->location_id)->onQueue('default');
+            UpdateStockLevels::dispatch($source->location_id, $source->workspace_id)->onQueue('default');
         } else {
             return response()->json(["message"=>"Delivery not found!"],400);
         }
