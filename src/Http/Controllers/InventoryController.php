@@ -235,6 +235,8 @@ class InventoryController extends Controller
         //delete the stock itself
         Stock::destroy($request->id);
 
+        UpdateStockLevels::dispatch($stock->location_id,$stock->workspace_id);
+
         return response()->json();
     }
 
