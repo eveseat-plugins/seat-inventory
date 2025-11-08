@@ -1110,7 +1110,8 @@
                         id: stock.fitting_plugin_fitting_id,
                         text: stock.name // should be synchrnoized with the fitting name
                     } : null,
-
+                    bundles_enabled: stock.bundle_size > 1,
+                    bundle_size: stock.bundle_size || StockCreationDefaults.bundle_size || 1,
                     invalidLocation: false,
                     invalidFit: false,
                     invalidName: false,
@@ -1408,6 +1409,53 @@
                                 //no need to update the ui
                             })
                     )
+                    // bundle size
+                    container.content(
+                        W2.html("div")
+                            .class("form-group")
+                            .content(
+                                W2.html("label")
+                                    .attribute("for", W2.getID("editStockPriority", true))
+                                    .content({!!json_encode(trans('inventory::inv.bundle'))!!}),
+                                W2.html("div")
+                                    .class("input-group")
+                                    .content(
+                                        W2.html("div").class("input-group-prepend")
+                                            .content(
+                                                W2.html("div").class("input-group-text")
+                                                    .content(
+                                                        W2.html("input")
+                                                            .attribute("type","checkbox")
+                                                            .attributeIf(state.bundles_enabled,"checked","checked")
+                                                            .event("change",(e)=>{
+                                                                console.log(e.currentTarget)
+                                                                state.bundles_enabled = e.currentTarget.checked
+                                                                mount.update()
+                                                            })
+                                                    ),
+                                                W2.html("span").class("input-group-text")
+                                                    .content("Enable Bundles")
+                                                    .event("click",()=>{
+                                                        state.bundles_enabled = !state.bundles_enabled
+                                                        mount.update()
+                                                    })
+                                            ),
+                                        W2.html("input")
+                                            .attribute("type","number")
+                                            .attribute("min",1)
+                                            .attributeIf(!state.bundles_enabled,"disabled",true)
+                                            .attributeIf(state.bundles_enabled,"value", state.bundle_size)
+                                            .attribute("placeholder","Enter the bundle size...")
+                                            .class("form-control")
+                                            .event(["change"], (e) => {
+                                                //update the state and rerender
+                                                state.bundle_size = parseInt(e.currentTarget.value)
+                                                StockCreationDefaults.bundle_size = state.bundle_size
+                                                mount.update()
+                                            })
+                                    )
+                            )
+                    )
 
                     //add bottom button bar
                     container.content(
@@ -1501,7 +1549,8 @@
                                             warning_threshold: state.warning_threshold,
                                             priority: state.priority,
                                             workspace: app.workspace.id,
-                                            contract_stocking_price: state.contract_stocking_price
+                                            contract_stocking_price: state.contract_stocking_price,
+                                            bundle_size: state.bundles_enabled ? state.bundle_size : 1,
                                         }
                                         if (state.type === "fit") {
                                             data.fit = state.fit
@@ -1538,7 +1587,8 @@
 
                 async function loadMultibuy(id) {
                     const response = await jsonPostAction("{{ route("inventory.exportItems") }}", {
-                        stocks: [id]
+                        stocks: [id],
+                        original_amount: true
                     })
 
                     if (!response.ok) {

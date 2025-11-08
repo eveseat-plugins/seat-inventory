@@ -160,7 +160,12 @@ const W2 = function () {
         }
 
         event(name,callback){
-            this.domNode.addEventListener(name,callback)
+            if(typeof name === "string") {
+                name = [name]
+            }
+            for (const ev of name) {
+                this.domNode.addEventListener(ev,callback)
+            }
             return this
         }
 

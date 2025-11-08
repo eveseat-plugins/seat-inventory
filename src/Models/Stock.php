@@ -105,13 +105,16 @@ class Stock extends Model
         })->unique();
         StockItem::destroy($this->items()->whereNotIn("type_id",$types)->pluck('id'));
 
+        //dd($this->bundle_size);
+
         $this->items()->upsert($items->map(function (HasTypeIDWithAmount $item){
             return [
                 'type_id'=>$item->getTypeID(),
-                'amount'=>$item->getAmount(),
+                'amount'=>$item->getAmount() * $this->bundle_size,
+                'original_amount' => $item->getAmount(),
                 'stock_id'=>$this->id,
-                'missing_items'=>$item->getAmount()
+                'missing_items'=>$item->getAmount() * $this->bundle_size
             ];
-        })->values()->toArray(),['type_id','stock_id'],['amount','missing_items']);
+        })->values()->toArray(),['type_id','stock_id'],['amount','missing_items','original_amount']);
     }
 }

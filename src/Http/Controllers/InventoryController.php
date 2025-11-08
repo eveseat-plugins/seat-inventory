@@ -254,6 +254,7 @@ class InventoryController extends Controller
             "multibuy"=>"nullable|string",
             "plugin_fitting_id"=>"nullable|integer",
             "name"=>"required_with:multibuy|string",
+            "bundle_size" => "required|integer|min:1",
             "workspace"=>"required|integer"
         ]);
 
@@ -312,6 +313,7 @@ class InventoryController extends Controller
             $stock->priority = $request->priority;
             $stock->fitting_plugin_fitting_id = $request->plugin_fitting_id;
             $stock->available = 0;
+            $stock->bundle_size = $request->bundle_size;
             $stock->workspace_id = $request->workspace;
 
             //make sure we get an id
@@ -324,7 +326,8 @@ class InventoryController extends Controller
                 $stock_item = new StockItem();
                 $stock_item->stock_id = $stock->id;
                 $stock_item->type_id = $item->typeModel->typeID;
-                $stock_item->amount = $item->amount;
+                $stock_item->amount = $item->amount * $stock->bundle_size;
+                $stock_item->original_amount = $item->amount;
                 return $stock_item;
             }));
         });
@@ -477,7 +480,10 @@ class InventoryController extends Controller
         $request->validate([
             "stocks" => "required|array",
             "stocks.*" => "integer",
+            "original_amount" => "nullable|boolean"
         ]);
+
+        $use_original_amount = $request->original_amount ?? false;
 
         $items = StockItem::whereIn("stock_id",$request->stocks)
             ->select(sprintf("%s.*", StockItem::TABLE),DB::raw(sprintf("(%s.amount * %s.amount) as full_amount", StockItem::TABLE, Stock::TABLE)))
@@ -492,6 +498,11 @@ class InventoryController extends Controller
 
         $all_item_list = StockItem::fromAlternativeAmountColumn($items,"full_amount");
         $all_item_list->simplify();
+
+        if($use_original_amount) {
+            $item_list = StockItem::fromAlternativeAmountColumn($items,"original_amount");
+            $item_list->simplify();
+        }
 
         return response()->json([
             "items"=>$item_list->asJsonStructure(),

@@ -38,4 +38,5 @@
      'inventory_stock_items' => 'Items',
      'inventory_add_items_message' => 'Please add items',
      'inventory_missing_items' => 'Missing Items',
+     'bundle' => 'Bundle'
  ];
