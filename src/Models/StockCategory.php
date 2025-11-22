@@ -35,7 +35,7 @@ class StockCategory extends Model
         $filters = $this->filters;
 
         $eligible = $stocks->filter(function (Stock $stock) use ($filters) {
-            return $stock->isEligibleForCategory($filters);
+            return $stock->workspace_id === $this->workspace_id && $stock->isEligibleForCategory($filters);
         })->pluck("id");
 
         foreach ($eligible as $stock){
