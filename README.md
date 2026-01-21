@@ -1,6 +1,6 @@
 # seat-inventory
 seat-inventory(https://github.com/recursivetree/seat-inventory)
-This plugin aims to make the life of corporations and alliances easier by helping to manage contracts and corporation 
+This plugin aims to make the life of corporations and alliances easier by helping to manage contracts, markets, and corporation 
 hangars. It loads contracts and corporation hangars from the ESI to make a list of what we have. 
 Additionally, you can define what you need(e.g. a doctrine ship) and where you need it(staging). 
 The plugin compares it to what you have and shows you how many times you have your doctrine ship stocked. 
