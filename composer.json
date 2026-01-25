@@ -1,7 +1,7 @@
 {
   "name": "recursivetree/seat-inventory",
   "description": "The inventory management tool for seat",
-  "license": "MIT",
+  "license": "GPL-2.0-only",
   "authors": [
     {
       "name": "recursivetree",
